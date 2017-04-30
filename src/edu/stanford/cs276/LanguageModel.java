@@ -8,8 +8,11 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Map;
+import java.util.TreeMap;
 
 import edu.stanford.cs276.util.Dictionary;
+import edu.stanford.cs276.util.Pair;
 
 /**
  * LanguageModel class constructs a language model from the training corpus.
@@ -23,7 +26,15 @@ public class LanguageModel implements Serializable {
 	private static final long serialVersionUID = 1L;
   private static LanguageModel lm_;
 
-  Dictionary unigram = new Dictionary();
+//  Dictionary unigram = new Dictionary();
+  Map<String, Integer> unigramCount = new TreeMap<String, Integer>();
+  Map<String, Double> unigramOdds = new TreeMap<String, Double>();
+  Map<Pair<String, String>, Integer> bigramCount = new TreeMap<Pair<String, String>, Integer>();
+  Map<Pair<String, String>, Double> bigramOdds = new TreeMap<Pair<String, String>, Double>();
+  Map<Pair<String, String>, Double> interpolatedOdds = new TreeMap<Pair<String, String>, Double>();
+  int numUnigrams = 0;
+  int numBigrams = 0;
+  double gamma = 0.1;
 
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
@@ -62,14 +73,53 @@ public class LanguageModel implements Serializable {
       BufferedReader input = new BufferedReader(new FileReader(file));
       String line = null;
       while ((line = input.readLine()) != null) {
+    	  
         /*
          * Remember: each line is a document (refer to PA2 handout)
          * TODO: Your code here
          */
-        unigram.add("cs276");
+    	  
+    	  String[] tokens = line.trim().split("\\s+");
+    	  int numWords = tokens.length;
+    	  for (int i = 0; i < numWords; i++) {
+    		  String token = tokens[i];
+    		  numUnigrams++;
+    		  if (unigramCount.containsKey(token)) {
+        		  unigramCount.put(token, unigramCount.get(token) + 1);
+    		  } else {
+    			  unigramCount.put(token, 1);
+    		  }
+    		  
+    		  // If this is not the first =token, count the bigram occurrences, too.
+    		  if (i != 0) {
+    			  numBigrams++;
+    			  Pair<String, String> bigram = new Pair<String, String>(tokens[i-1], tokens[i]);
+        		  if (bigramCount.containsKey(bigram)) {
+            		  bigramCount.put(bigram, bigramCount.get(bigram) + 1);
+        		  } else {
+        			  bigramCount.put(bigram, 1);
+        		  }
+    		  }
+    	  }
       }
+      
+      
+      // Three for-loops over a lot of data... Is there a more efficient way to do this though?
+      // Populating the unigram and bigram probabilities
+      for (Pair<String, String> bigram : bigramCount.keySet()) {
+    	  bigramOdds.put(bigram, bigramCount.get(bigram)*1.0/unigramCount.get(bigram.getFirst()));
+      }
+      for (String unigram : unigramCount.keySet()) {
+    	  unigramOdds.put(unigram, unigramCount.get(unigram)*1.0/numUnigrams);
+      }
+      
+      for (Pair<String, String> bigram : bigramOdds.keySet()) {
+    	  interpolatedOdds.put(bigram, gamma*unigramOdds.get(bigram.getSecond()) + (1 - gamma) * bigramOdds.get(bigram));
+      }
+      
       input.close();
     }
+    
     System.out.println("Done.");
   }
 
