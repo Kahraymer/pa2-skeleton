@@ -17,6 +17,9 @@ public class UniformCostModel implements EditCostModel {
 	 */
 	  
 	  // Let's assume that the weight we give to a DL distance is 0.5 (arbitrary, but equivalent)
+	  if (distance == 0) {
+		  return 0.90;
+	  }
 	  return Math.pow(0.1, distance);
 			  
 	/*
