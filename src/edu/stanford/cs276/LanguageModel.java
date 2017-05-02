@@ -31,7 +31,7 @@ public class LanguageModel implements Serializable {
   Map<String, Double> unigramOdds = new TreeMap<String, Double>();
   Map<Pair<String, String>, Integer> bigramCount = new TreeMap<Pair<String, String>, Integer>();
   Map<Pair<String, String>, Double> bigramOdds = new TreeMap<Pair<String, String>, Double>();
-  Map<Pair<String, String>, Double> interpolatedOdds = new TreeMap<Pair<String, String>, Double>();
+//  Map<Pair<String, String>, Double> interpolatedOdds = new TreeMap<Pair<String, String>, Double>();
   int numUnigrams = 0;
   int numBigrams = 0;
   double gamma = 0.1;
@@ -113,9 +113,11 @@ public class LanguageModel implements Serializable {
     	  unigramOdds.put(unigram, unigramCount.get(unigram)*1.0/numUnigrams);
       }
       
-      for (Pair<String, String> bigram : bigramOdds.keySet()) {
-    	  interpolatedOdds.put(bigram, gamma*unigramOdds.get(bigram.getSecond()) + (1 - gamma) * bigramOdds.get(bigram));
-      }
+      // Interpolated Odds should be calculated on the fly, since they depend on the bigram before it which may not 
+      // be in the bigram dictionary.
+//      for (Pair<String, String> bigram : bigramOdds.keySet()) {
+//    	  interpolatedOdds.put(bigram, gamma*unigramOdds.get(bigram.getSecond()) + (1 - gamma) * bigramOdds.get(bigram));
+//      }
       
       input.close();
     }

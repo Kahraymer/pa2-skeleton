@@ -11,7 +11,16 @@ public class UniformCostModel implements EditCostModel {
 	
   @Override
   public double editProbability(String original, String R, int distance) {
-    return 0.5;
-    // TODO: Your code here
+	  
+	/*
+     * START OF ADDED CODE
+	 */
+	  
+	  // Let's assume that the weight we give to a DL distance is 0.5 (arbitrary, but equivalent)
+	  return Math.pow(0.5, distance);
+			  
+	/*
+	 * END OF ADDED CODE
+	 */
   }
 }
