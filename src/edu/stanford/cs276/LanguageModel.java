@@ -56,6 +56,11 @@ public class LanguageModel implements Serializable {
     constructDictionaries(corpusFilePath);
   }
   
+  
+  /*
+   * Public function that calculates the interpolated probability of two strings
+   * as a bigram. Returns a double. Written by Tom
+   */
   public static double probInterpolated(String w1, String w2) {
 	  
 	  double probUni = unigramOdds.get(w1);
