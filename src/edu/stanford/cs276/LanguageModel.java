@@ -27,14 +27,14 @@ public class LanguageModel implements Serializable {
   private static LanguageModel lm_;
 
 //  Dictionary unigram = new Dictionary();
-  Map<String, Integer> unigramCount = new TreeMap<String, Integer>();
-  Map<String, Double> unigramOdds = new TreeMap<String, Double>();
-  Map<Pair<String, String>, Integer> bigramCount = new TreeMap<Pair<String, String>, Integer>();
-  Map<Pair<String, String>, Double> bigramOdds = new TreeMap<Pair<String, String>, Double>();
+  private static Map<String, Integer> unigramCount = new TreeMap<String, Integer>();
+  private static Map<String, Double> unigramOdds = new TreeMap<String, Double>();
+  private static Map<Pair<String, String>, Integer> bigramCount = new TreeMap<Pair<String, String>, Integer>();
+  private static Map<Pair<String, String>, Double> bigramOdds = new TreeMap<Pair<String, String>, Double>();
 //  Map<Pair<String, String>, Double> interpolatedOdds = new TreeMap<Pair<String, String>, Double>();
   int numUnigrams = 0;
   int numBigrams = 0;
-  double gamma = 0.1;
+  static double gamma = 0.1;
 
   /*
    * Feel free to add more members here (e.g., a data structure that stores bigrams)
@@ -54,6 +54,17 @@ public class LanguageModel implements Serializable {
    */
   private LanguageModel(String corpusFilePath) throws Exception {
     constructDictionaries(corpusFilePath);
+  }
+  
+  public static double probInterpolated(String w1, String w2) {
+	  
+	  double probUni = unigramOdds.get(w1);
+	  Pair<String, String> thisBigram = new Pair<String, String>(w1, w2);
+	  double probBi = 0.0;
+	  if (bigramOdds.get(thisBigram) != null) {
+		  probBi = bigramOdds.get(thisBigram);
+	  }
+	  return ((gamma*probUni) + ((1 - gamma)*(probBi)));
   }
 
   /**
@@ -90,7 +101,7 @@ public class LanguageModel implements Serializable {
     			  unigramCount.put(token, 1);
     		  }
     		  
-    		  // If this is not the first =token, count the bigram occurrences, too.
+    		  // If this is not the first token, count the bigram occurrences, too.
     		  if (i != 0) {
     			  numBigrams++;
     			  Pair<String, String> bigram = new Pair<String, String>(tokens[i-1], tokens[i]);
@@ -145,6 +156,7 @@ public class LanguageModel implements Serializable {
         FileInputStream fiA = new FileInputStream(Config.languageModelFile);
         ObjectInputStream oisA = new ObjectInputStream(fiA);
         lm_ = (LanguageModel) oisA.readObject();
+        oisA.close(); // THIS LINE WAS ADDED BY TOM
       }
     } catch (Exception e) {
       throw new Exception("Unable to load language model.  You may not have run buildmodels.sh!");

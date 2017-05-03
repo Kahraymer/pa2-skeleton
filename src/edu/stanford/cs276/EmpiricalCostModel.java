@@ -52,30 +52,24 @@ public class EmpiricalCostModel implements EditCostModel {
 		String noisySubstr = noisy;
 	      String cleanSubstr = clean;
 	      int index = indexOfDifference(noisySubstr, cleanSubstr);
-	      while (true) {
 	    	  if (index > 0) {
 	        	  noisySubstr = noisy.substring(index);
 	        	  cleanSubstr = clean.substring(index);
-	        	  index = indexOfDifference(noisySubstr, cleanSubstr);
-	        	  continue;
-	    	  } else if (index == 0) {
+
+	    	  } 
+	    	  
+	    	  if (index == 0) {
 	    		  // First letters of strings differ
 	        	  if (noisySubstr.length() == 0) {
 	        		  commonlyEliminated.add(cleanSubstr);
-	        		  break;
 	        	  } else if (cleanSubstr.length() == 0) {
 	        		  commonlyInserted.add(noisySubstr);
-	        		  break;
 	        	  } else {
 	        		  if (cleanSubstr.length() >= 2 && noisySubstr.length() >= 2) {
 	    				  // Checking for commonly transposed characters
 	    				  if ((cleanSubstr.substring(0,1) == noisySubstr.substring(1,2)) && (noisySubstr.substring(0,1) == cleanSubstr.substring(1,2))) {
 	    					  Pair<String, String> thisPair = new Pair<String, String>(noisySubstr.substring(0,2), cleanSubstr.substring(0,2));
 	    					  commonlyTransposed.add(thisPair);
-	    					  noisySubstr = noisySubstr.substring(2);
-	    					  cleanSubstr = cleanSubstr.substring(2);
-	    		        	  index = indexOfDifference(noisySubstr, cleanSubstr);
-	    		        	  continue;
 	    				  }
 	    			  }
 	        		  
@@ -84,56 +78,10 @@ public class EmpiricalCostModel implements EditCostModel {
 	        			  if (cleanSubstr.substring(1).equalsIgnoreCase(noisySubstr.substring(1))) {
 	        				  Pair<String, String> thisPair = new Pair<String, String>(noisySubstr.substring(0, 1), cleanSubstr.substring(0,1));
 	        				  commonlySubbed.add(thisPair);
-	    					  noisySubstr = noisySubstr.substring(1);
-	    					  cleanSubstr = cleanSubstr.substring(1);
-	    		        	  index = indexOfDifference(noisySubstr, cleanSubstr);
-	    		        	  continue;
 	        			  }
 	        		  }
-	        		  
-	        		  // Neither word is null, no transpositions or substitutions
-	        		  int indexOfSimilarity = -1;
-	        		  if (noisySubstr.contains(cleanSubstr)) {
-	        			  indexOfSimilarity = noisySubstr.indexOf(cleanSubstr);
-	        			  commonlyInserted.add(noisySubstr.substring(0, indexOfSimilarity));
-	        			  noisySubstr = noisySubstr.substring(indexOfSimilarity);
-	        			  break;
-	        		  } else if (cleanSubstr.contains(noisySubstr)) {
-	        			  indexOfSimilarity = cleanSubstr.indexOf(noisySubstr);
-	        			  commonlyEliminated.add(cleanSubstr.substring(0, indexOfSimilarity));
-	        			  cleanSubstr = cleanSubstr.substring(indexOfSimilarity);
-	        			  break;
-	        		  }
-	        		  // Handling when there is more than one cluster of differences between the strings
-	        		  if (indexOfSimilarity == -1) {
-	        			  int shorterLen = Math.min(noisySubstr.length(), cleanSubstr.length());
-	        			  shorterLen = Math.min(shorterLen, 2);
-	        			  for (int i = 0; i < shorterLen; i++) {
-	        				  int eliminatedLettersLen = indexOfDifference(noisySubstr, cleanSubstr.substring(i));
-	        				  int insertedLettersLen = indexOfDifference(noisySubstr, cleanSubstr.substring(i));
-	        				  
-	        				  if (eliminatedLettersLen > 0) {
-	        					  cleanSubstr = cleanSubstr.substring(0, i);
-	        					  commonlyEliminated.add(cleanSubstr);
-	        		        	  index = indexOfDifference(noisySubstr, cleanSubstr); 
-	        					  break;
-	        				  } else if (insertedLettersLen > 0) {
-	        					  noisySubstr = noisySubstr.substring(0, i);
-	        					  commonlyInserted.add(noisySubstr);
-	        		        	  index = indexOfDifference(noisySubstr, cleanSubstr); 
-	        		        	  break;
-	        				  }
-	        			  }
-	                	  if (index > -1) {
-	                		  continue;
-	                	  }
-	        		  }
-	        		  
 	        	  }
-	    	  } else if (index == -1) {
-	    		  break;
-	    	  }
-	      }
+	    	  } // else if (index == -1) Do Nothing, since there was no difference
 	}
 	
   public EmpiricalCostModel(String editsFile) throws IOException {
@@ -155,12 +103,13 @@ public class EmpiricalCostModel implements EditCostModel {
       
       // Singling out the character level common edits
       populateDataStructures(noisy, clean);
+      lineSc.close();
        
       /*
        * END OF ADDED CODE
        */
     }
-
+    
     input.close();
     System.out.println("Done.");
   }
