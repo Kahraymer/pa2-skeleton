@@ -50,38 +50,36 @@ public class EmpiricalCostModel implements EditCostModel {
 	
 	public void populateDataStructures(String noisy, String clean) {
 		String noisySubstr = noisy;
-	      String cleanSubstr = clean;
-	      int index = indexOfDifference(noisySubstr, cleanSubstr);
-	    	  if (index > 0) {
-	        	  noisySubstr = noisy.substring(index);
-	        	  cleanSubstr = clean.substring(index);
-
-	    	  } 
-	    	  
-	    	  if (index == 0) {
-	    		  // First letters of strings differ
-	        	  if (noisySubstr.length() == 0) {
-	        		  commonlyEliminated.add(cleanSubstr);
-	        	  } else if (cleanSubstr.length() == 0) {
-	        		  commonlyInserted.add(noisySubstr);
-	        	  } else {
-	        		  if (cleanSubstr.length() >= 2 && noisySubstr.length() >= 2) {
-	    				  // Checking for commonly transposed characters
-	    				  if ((cleanSubstr.substring(0,1) == noisySubstr.substring(1,2)) && (noisySubstr.substring(0,1) == cleanSubstr.substring(1,2))) {
-	    					  Pair<String, String> thisPair = new Pair<String, String>(noisySubstr.substring(0,2), cleanSubstr.substring(0,2));
-	    					  commonlyTransposed.add(thisPair);
-	    				  }
-	    			  }
-	        		  
-	        		  if (cleanSubstr.length() >= 1 && noisySubstr.length() >= 1) {
-	        			  // Checking for commonly substituted characters
-	        			  if (cleanSubstr.substring(1).equalsIgnoreCase(noisySubstr.substring(1))) {
-	        				  Pair<String, String> thisPair = new Pair<String, String>(noisySubstr.substring(0, 1), cleanSubstr.substring(0,1));
-	        				  commonlySubbed.add(thisPair);
-	        			  }
-	        		  }
-	        	  }
-	    	  } // else if (index == -1) Do Nothing, since there was no difference
+		String cleanSubstr = clean;
+		int index = indexOfDifference(noisySubstr, cleanSubstr);
+		if (index > 0) {
+			noisySubstr = noisy.substring(index);
+			cleanSubstr = clean.substring(index);
+		} 
+	  
+		if (index == 0) {
+			// First letters of strings differ
+			if (noisySubstr.length() == 0) {
+				commonlyEliminated.add(cleanSubstr);
+			} else if (cleanSubstr.length() == 0) {
+				commonlyInserted.add(noisySubstr);
+			} else {
+				if (cleanSubstr.length() >= 2 && noisySubstr.length() >= 2) {
+					// Checking for commonly transposed characters
+					if ((cleanSubstr.substring(0,1) == noisySubstr.substring(1,2)) && (noisySubstr.substring(0,1) == cleanSubstr.substring(1,2))) {
+						Pair<String, String> thisPair = new Pair<String, String>(noisySubstr.substring(0,2), cleanSubstr.substring(0,2));
+						commonlyTransposed.add(thisPair);
+					}
+				} 
+				if (cleanSubstr.length() >= 1 && noisySubstr.length() >= 1) {
+					// Checking for commonly substituted characters
+					if (cleanSubstr.substring(1).equalsIgnoreCase(noisySubstr.substring(1))) {
+						Pair<String, String> thisPair = new Pair<String, String>(noisySubstr.substring(0, 1), cleanSubstr.substring(0,1));
+						commonlySubbed.add(thisPair);
+					}
+				}
+			}
+		} // else if (index == -1) Do Nothing, since there was no difference
 	}
 	
   public EmpiricalCostModel(String editsFile) throws IOException {
@@ -121,7 +119,6 @@ public class EmpiricalCostModel implements EditCostModel {
 	   * START OF ADDED CODE
 	   */
 	  
-//	  if ()
 	  
 	  if (distance == 0) {
 		  return 0.9;
@@ -135,6 +132,61 @@ public class EmpiricalCostModel implements EditCostModel {
 			  return Math.pow(0.05, distance);
 		  }
 	  }
+	  
+	  double toReturn = 1.0;
+      int index = indexOfDifference(original, R);
+      original = original.substring(index);
+      R = R.substring(index);
+      	
+      if (index == 0) {
+    	  // Checking for an inserted character
+    	  if (R.length() == 0 || original.substring(1).equalsIgnoreCase(R)) {
+    		  String addedLetter = original.substring(0, 1); // Guaranteed, since words don't match
+    		  if (commonlyInserted.contains(addedLetter)) {
+    			  toReturn *= 0.2;
+    		  } else {
+    			  toReturn *= 0.1;
+    		  }
+    		  
+    	  // Checking for a removed character
+    	  } else if (original.length() == 0 || R.substring(1).equalsIgnoreCase(original)) {
+    		  String removedLetter = R.substring(0, 1);
+    		  if (commonlyEliminated.contains(removedLetter)) {
+    			  toReturn *= 0.2;
+    		  } else {
+    			  toReturn *= 0.1;
+    		  }
+    		  
+    	  // Checking for a substituted letter
+    	  } else if (original.substring(1).equalsIgnoreCase(R.substring(1))) {
+    		  Pair<String, String> subbedLetters = new Pair<String, String>(original.substring(0,1), R.substring(0,1));
+    		  if (commonlySubbed.contains(subbedLetters)) {
+    			  toReturn *= 0.2;
+    		  } else {
+    			  toReturn *= 0.1;
+    		  }
+    		  
+    	  // Checking for transposed letters
+    	  } else if (original.length() >= 2 && R.length() >= 2) {
+    		  if (original.substring(0,1).equalsIgnoreCase(R.substring(1,2))) {
+    			  if (original.substring(1,2).equalsIgnoreCase(R.substring(0,1))) {
+    				  Pair<String, String> transposedLetters = new Pair<String, String>(original.substring(0,1), R.substring(0,1));
+    				  if (commonlyTransposed.contains(transposedLetters)) {
+    					  toReturn *= 0.2;
+    				  } else {
+    					  toReturn *= 0.1;
+    				  }
+    			  }
+    		  }
+    	  }
+    	  if (toReturn == 1.0) {
+    		  System.out.println("Didn't catch one of the four errors...");
+    		  return Math.pow(0.1, distance); // Dummy line for compiler reasons
+    	  }
+    	  
+    	  return toReturn;
+      }
+      
 	  
 	  
 	  return Math.pow(0.1, distance);

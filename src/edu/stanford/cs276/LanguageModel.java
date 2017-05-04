@@ -122,15 +122,7 @@ public class LanguageModel implements Serializable {
     	  }
       }
       
-      
-      // Three for-loops over a lot of data... Is there a more efficient way to do this though?
-      // Populating the unigram and bigram probabilities
-      for (Pair<String, String> bigram : bigramCount.keySet()) {
-    	  bigramOdds.put(bigram, bigramCount.get(bigram)*1.0/unigramCount.get(bigram.getFirst()));
-      }
-      for (String unigram : unigramCount.keySet()) {
-    	  unigramOdds.put(unigram, unigramCount.get(unigram)*1.0/numUnigrams);
-      }
+  
       
       // Interpolated Odds should be calculated on the fly, since they depend on the bigram before it which may not 
       // be in the bigram dictionary.
@@ -139,6 +131,15 @@ public class LanguageModel implements Serializable {
 //      }
       
       input.close();
+    }
+    
+    // Three for-loops over a lot of data... Is there a more efficient way to do this though?
+    // Populating the unigram and bigram probabilities
+    for (Pair<String, String> bigram : bigramCount.keySet()) {
+  	  bigramOdds.put(bigram, bigramCount.get(bigram)*1.0/unigramCount.get(bigram.getFirst()));
+    }
+    for (String unigram : unigramCount.keySet()) {
+  	  unigramOdds.put(unigram, unigramCount.get(unigram)*1.0/numUnigrams);
     }
     
     System.out.println("Done.");
