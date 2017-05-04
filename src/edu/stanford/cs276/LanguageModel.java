@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -29,8 +30,8 @@ public class LanguageModel implements Serializable {
 //  Dictionary unigram = new Dictionary();
   Map<String, Integer> unigramCount = new TreeMap<String, Integer>();
   private static Map<String, Double> unigramOdds = new TreeMap<String, Double>();
-  private static Map<Pair<String, String>, Integer> bigramCount = new TreeMap<Pair<String, String>, Integer>();
-  private static Map<Pair<String, String>, Double> bigramOdds = new TreeMap<Pair<String, String>, Double>();
+  private static Map<Pair<String, String>, Integer> bigramCount = new HashMap<Pair<String, String>, Integer>();
+  private static Map<Pair<String, String>, Double> bigramOdds = new HashMap<Pair<String, String>, Double>();
 //  Map<Pair<String, String>, Double> interpolatedOdds = new TreeMap<Pair<String, String>, Double>();
   int numUnigrams = 0;
   int numBigrams = 0;
@@ -88,13 +89,14 @@ public class LanguageModel implements Serializable {
       System.out.printf("Reading data file %s ...\n", file.getName());
       BufferedReader input = new BufferedReader(new FileReader(file));
       String line = null;
+      unigramCount.put("", 0);
       while ((line = input.readLine()) != null) {
     	  
         /*
          * Remember: each line is a document (refer to PA2 handout)
          * TODO: Your code here
          */
-    	  
+    	  unigramCount.put("", unigramCount.get("") + 1);
     	  String[] tokens = line.trim().split("\\s+");
     	  int numWords = tokens.length;
     	  for (int i = 0; i < numWords; i++) {
