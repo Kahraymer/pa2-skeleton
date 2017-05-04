@@ -38,6 +38,44 @@ public class CandidateGenerator implements Serializable {
     /*
      * Your code here
      */
+    
+    for (int i = 0; i < query.length(); i++) {
+    	String temp;
+    	for (Character letter : alphabet) {
+    		// Each possible letter replacement
+    		String thisChar = letter.toString();
+    		temp = query.substring(0, i).concat(thisChar);
+    		if (i != (query.length() - 1)) {
+    			temp = temp.concat(query.substring(i+1));
+    		}
+    		candidates.add(temp);
+    		
+    		// Each possible letter addition
+        	temp = query.substring(0,i).concat(thisChar);
+    		if (i != (query.length() - 1)) {
+    			temp = temp.concat(query.substring(i));
+    		}
+    		candidates.add(temp);
+
+    	}
+    	if (i != (query.length() - 1)) {
+    		// Each possible transposition
+    		temp = query.substring(0, i).concat(query.substring(i+1, i+2)).concat(query.substring(i, i+1));
+    		if (i != (query.length() - 2)) {
+    			temp = temp.concat(query.substring(i+2));
+    		}
+    	candidates.add(temp);
+    	}
+    	
+    	// Each possible letter elimination
+    	temp = query.substring(0, i);
+    	if (i != (query.length() - 1)) {
+        	temp = temp.concat(query.substring(i+1));
+
+    	}
+    	candidates.add(temp);    	
+    
+    }
     return candidates;
   }
 

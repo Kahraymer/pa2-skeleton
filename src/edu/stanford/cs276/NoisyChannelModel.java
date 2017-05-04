@@ -45,6 +45,11 @@ public class NoisyChannelModel implements Serializable {
     empiricalCostModel = new EmpiricalCostModel(editsFile);
     uniformCostModel = new UniformCostModel();
   }
+  
+  
+  public double editProbability (String original, String R, int distance) {
+	  return ecm_.editProbability(original, R, distance);
+  }
 
   /**
    * Creates a new NoisyChannelModel object from the query corpus. This method should be used to

@@ -27,7 +27,7 @@ public class LanguageModel implements Serializable {
   private static LanguageModel lm_;
 
 //  Dictionary unigram = new Dictionary();
-  private static Map<String, Integer> unigramCount = new TreeMap<String, Integer>();
+  Map<String, Integer> unigramCount = new TreeMap<String, Integer>();
   private static Map<String, Double> unigramOdds = new TreeMap<String, Double>();
   private static Map<Pair<String, String>, Integer> bigramCount = new TreeMap<Pair<String, String>, Integer>();
   private static Map<Pair<String, String>, Double> bigramOdds = new TreeMap<Pair<String, String>, Double>();
@@ -106,15 +106,16 @@ public class LanguageModel implements Serializable {
     			  unigramCount.put(token, 1);
     		  }
     		  
-    		  // If this is not the first token, count the bigram occurrences, too.
+    		  // Count the bigram occurrences, too. If first token, count "" as previous word
+    		  Pair<String, String> bigram = new Pair<String, String>("", tokens[i]);
     		  if (i != 0) {
-    			  numBigrams++;
-    			  Pair<String, String> bigram = new Pair<String, String>(tokens[i-1], tokens[i]);
-        		  if (bigramCount.containsKey(bigram)) {
-            		  bigramCount.put(bigram, bigramCount.get(bigram) + 1);
-        		  } else {
-        			  bigramCount.put(bigram, 1);
-        		  }
+    			  bigram = new Pair<String, String>(tokens[i-1], tokens[i]);
+    		  }
+			  numBigrams++;
+    		  if (bigramCount.containsKey(bigram)) {
+        		  bigramCount.put(bigram, bigramCount.get(bigram) + 1);
+    		  } else {
+    			  bigramCount.put(bigram, 1);
     		  }
     	  }
       }

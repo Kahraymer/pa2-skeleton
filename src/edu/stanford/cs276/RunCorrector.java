@@ -3,6 +3,11 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import edu.stanford.cs276.util.Pair;
 
 
 public class RunCorrector {
@@ -62,7 +67,8 @@ public class RunCorrector {
     nsm = NoisyChannelModel.load();
     BufferedReader queriesFileReader = new BufferedReader(new FileReader(new File(queryFilePath)));
     nsm.setProbabilityType(uniformOrEmpirical);
-
+    CandidateGenerator cg = CandidateGenerator.get();
+    
     String query = null;
 
     /*
@@ -72,12 +78,50 @@ public class RunCorrector {
     while ((query = queriesFileReader.readLine()) != null) {
 
       String correctedQuery = query;
+      
+      /*
+       * START OF ADDED CODE
+       */
+      
+      
       /*
        * Your code here: currently the correctQuery and original query are the same
        * Complete this implementation so that the spell corrector corrects the 
        * (possibly) misspelled query
        * 
        */
+      
+	  String[] tokens = query.trim().split("\\s+");
+	  
+	  // Populate a map linking likelihoods to original/candidate String pairs
+	  Map<Double, Pair<String, String>> candidateScores = new TreeMap<Double, Pair<String, String>>();
+	  
+	  for (int i = 0; i < tokens.length; i++) {
+		  // For every word, calculate a product of interpolated uni/bigram probability and the likelihood of that mistake
+		  String token = tokens[i];
+		  Set<String> candidates = cg.getCandidates(token);
+		  for (String candidate : candidates) {
+			  if (languageModel.unigramCount.keySet().contains(candidate)) {
+				  
+				  double editScore = nsm.editProbability(token, candidate, 1);
+				  double probInterpolated = 0.0;
+				  if (i == 0) {
+					  probInterpolated = LanguageModel.probInterpolated("", candidate);
+				  } else {
+					  probInterpolated = LanguageModel.probInterpolated(tokens[i-1], candidate);
+				  }
+				  double finalScore = editScore*probInterpolated;
+				  Pair<String, String> possibleCandidate = new Pair<String, String>(token, candidate);
+				  candidateScores.put(finalScore, possibleCandidate);
+			  }
+		  }
+	  }
+      
+      
+      /*
+       * END OF ADDED CODE
+       */
+
       
       if ("extra".equals(extra)) {
         /*
