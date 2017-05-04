@@ -91,31 +91,32 @@ public class RunCorrector {
        * 
        */
       
-	  String[] tokens = query.trim().split("\\s+");
-	  
-	  // Populate a map linking likelihoods to original/candidate String pairs
-	  Map<Double, Pair<String, String>> candidateScores = new TreeMap<Double, Pair<String, String>>();
-	  
-	  for (int i = 0; i < tokens.length; i++) {
-		  // For every word, calculate a product of interpolated uni/bigram probability and the likelihood of that mistake
-		  String token = tokens[i];
-		  Set<String> candidates = cg.getCandidates(token);
-		  for (String candidate : candidates) {
-			  if (languageModel.unigramCount.keySet().contains(candidate)) {
-				  
-				  double editScore = nsm.editProbability(token, candidate, 1);
-				  double probInterpolated = 0.0;
-				  if (i == 0) {
-					  probInterpolated = LanguageModel.probInterpolated("", candidate);
-				  } else {
-					  probInterpolated = LanguageModel.probInterpolated(tokens[i-1], candidate);
-				  }
-				  double finalScore = editScore*probInterpolated;
-				  Pair<String, String> possibleCandidate = new Pair<String, String>(token, candidate);
-				  candidateScores.put(finalScore, possibleCandidate);
-			  }
-		  }
-	  }
+//	  String[] tokens = query.trim().split("\\s+");
+//	  
+//	  // Populate a map linking likelihoods to original/candidate String pairs
+//	  TreeMap<Double, String> candidateScores = new TreeMap<Double, String>();
+//	  Map<Double, Pair<String, String>> topCandidates = new TreeMap<Double, Pair<String, String>>();
+//	  for (int i = 0; i < tokens.length; i++) {
+//		  // For every word, calculate a product of interpolated uni/bigram probability and the likelihood of that mistake
+//		  String token = tokens[i];
+//		  candidateScores.clear();
+//		  Set<String> candidates = cg.getCandidates(token);
+//		  for (String candidate : candidates) {
+//			  if (languageModel.unigramCount.keySet().contains(candidate)) {
+//				  
+//				  double editScore = nsm.editProbability(token, candidate, 1);
+//				  double probInterpolated = 0.0;
+//				  if (i == 0) {
+//					  probInterpolated = LanguageModel.probInterpolated("", candidate);
+//				  } else {
+//					  probInterpolated = LanguageModel.probInterpolated(tokens[i-1], candidate);
+//				  }
+//				  double finalScore = editScore*probInterpolated;
+//				  candidateScores.put(finalScore, candidate);
+//			  }
+//			  Pair<String, String> bestCandidate = new Pair<String, String>(token, candidateScores.lastKey());
+//		  }
+//	  }
       
       
       /*
