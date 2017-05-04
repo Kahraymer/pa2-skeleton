@@ -121,6 +121,8 @@ public class EmpiricalCostModel implements EditCostModel {
 	   * START OF ADDED CODE
 	   */
 	  
+//	  if ()
+	  
 	  if (distance == 0) {
 		  return 0.9;
 	  }

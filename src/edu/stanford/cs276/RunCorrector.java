@@ -3,6 +3,8 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -91,34 +93,49 @@ public class RunCorrector {
        * 
        */
       
-//	  String[] tokens = query.trim().split("\\s+");
+	  String[] tokens = query.trim().split("\\s+");
 //	  
 //	  // Populate a map linking likelihoods to original/candidate String pairs
-//	  TreeMap<Double, String> candidateScores = new TreeMap<Double, String>();
-//	  Map<Double, Pair<String, String>> topCandidates = new TreeMap<Double, Pair<String, String>>();
-//	  for (int i = 0; i < tokens.length; i++) {
-//		  // For every word, calculate a product of interpolated uni/bigram probability and the likelihood of that mistake
-//		  String token = tokens[i];
-//		  candidateScores.clear();
-//		  Set<String> candidates = cg.getCandidates(token);
-//		  for (String candidate : candidates) {
-//			  if (languageModel.unigramCount.keySet().contains(candidate)) {
-//				  
-//				  double editScore = nsm.editProbability(token, candidate, 1);
-//				  double probInterpolated = 0.0;
-//				  if (i == 0) {
-//					  probInterpolated = LanguageModel.probInterpolated("", candidate);
-//				  } else {
-//					  probInterpolated = LanguageModel.probInterpolated(tokens[i-1], candidate);
-//				  }
-//				  double finalScore = editScore*probInterpolated;
-//				  candidateScores.put(finalScore, candidate);
-//			  }
-//			  Pair<String, String> bestCandidate = new Pair<String, String>(token, candidateScores.lastKey());
-//		  }
-//	  }
-      
-      
+	  TreeMap<Double, String> candidateScores = new TreeMap<Double, String>();
+	  List<Pair<String, String>> topCandidates = new ArrayList<Pair<String, String>>();
+	  for (int i = 0; i < tokens.length; i++) {
+		  // For every word, calculate a product of interpolated uni/bigram probability and the likelihood of that mistake
+		  String token = tokens[i];
+		  candidateScores.clear();
+		  Set<String> candidates = cg.getCandidates(token);
+		  for (String candidate : candidates) {
+			  if (languageModel.unigramCount.keySet().contains(candidate)) {
+				  
+				  double editScore = nsm.editProbability(token, candidate, 1);
+				  double probInterpolated = 0.0;
+				  if (i == 0) {
+					  probInterpolated = LanguageModel.probInterpolated("", candidate);
+				  } else {
+					  probInterpolated = LanguageModel.probInterpolated(tokens[i-1], candidate);
+				  }
+				  double finalScore = editScore*probInterpolated;
+				  candidateScores.put(finalScore, candidate);
+			  }
+			  Pair<String, String> bestCandidate = new Pair<String, String>(token, candidateScores.get(candidateScores.lastKey()));
+			  topCandidates.add(bestCandidate);
+		  }
+	  }
+	  
+	  int fixesLeft = 2;
+	  for (int i = 0; i < tokens.length; i++) {
+		  String token = tokens[i];
+		  Pair<String, String> candidate = topCandidates.get(i);
+		  if (token == candidate.getFirst()) { // Double checking that this is replacing the right word
+			  if (token != candidate.getSecond()) {
+				  tokens[i] = candidate.getSecond();
+				  fixesLeft--;
+				  if (fixesLeft == 0) {
+					  break;
+				  }
+			  }
+		  }
+	  }
+	  correctedQuery = String.join(" ", tokens);
       /*
        * END OF ADDED CODE
        */
